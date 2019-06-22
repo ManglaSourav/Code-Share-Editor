@@ -24,7 +24,7 @@ userSchema.methods.setPassword = function(password) {
 
 userSchema.methods.validPassword = function(password) {
   var hash = crypto
-    .pbkdf2Sync(password, this.salt, 1000, 64, "sha1")
+    .pbkdf2Sync(password, this.salt, 1000, 64, "sha1")//Password-Based Key Derivation Function
     .toString("hex");
   return this.hash === hash;
 };

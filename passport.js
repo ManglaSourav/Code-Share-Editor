@@ -1,12 +1,22 @@
 var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
-var User = require("./models/user");
-//to initialise the session when user login
+
+/*
+The basic idea about serialization and deserialization is, when a user is 
+authenticated, Passport will save the user’s _id property to the session as 
+req.session.passport.user. 
+Later on when the user object is needed, Passport will use the _id property 
+to grab the user object from the database. The reason why we don’t save the 
+entire user object in session are: 
+1. Reduce the size of the session; 
+2. It’s much safer to not save all the user information in the session in case 
+of misuse.
+*/
+
 passport.serializeUser(function(user, done) {
-  done(null, user._id);
+  done(null, user.id);
 });
 
-//accept the session
 passport.deserializeUser(function(id, done) {
   User.findOne({ _id: id }, function(err, user) {
     done(err, user);
@@ -20,6 +30,7 @@ passport.use(
     },
     function(username, password, done) {
       User.findOne({ email: username }, function(err, user) {
+        //handle error
         if (err) return done(err);
         if (!user) {
           return done(null, false, {
@@ -28,9 +39,10 @@ passport.use(
         }
         if (!user.validPassword(password)) {
           return done(null, false, {
-            message: "Incorrect username or password"
+            message: "incorrect username or password"
           });
         }
+        // all good return user
         return done(null, user);
       });
     }

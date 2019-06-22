@@ -24,6 +24,9 @@
     .list1 {
       flex-grow: 1;
     }
+    .list2 {
+      flex-basis: 13%
+    }
   </style>
 </head>
 
@@ -49,7 +52,13 @@
       {{!-- style="margin-left:950px " --}}
       <ul class="nav navbar-nav list2">
         {{#if user}}
-        <li class="nav-item"><a class="nav-link" href="# ">{{user.name}}</a></li>
+        <li class='nav-item dropdown'>
+          <a href="  " class='nav-link dropdown-toggle' data-toggle='dropdown' role='button' aria-haspopup="true"
+            aria-expanded="false">{{user.name}}<span class='caret'></span></a>
+          <ul class='dropdown-menu'>
+            <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+          </ul>
+        </li>
         {{else}}
         <li class="nav-item">
           <a class="nav-link" href='/auth/login'>Login </a>
