@@ -31,9 +31,10 @@
         </div>
     </div>
 </div>
+<input type="hidden" value="{{roomId}}" id="roomId">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+{{!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> --}}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/javascript/javascript.min.js'></script>
@@ -47,12 +48,12 @@
 
     var username = $('#chatbox-username').val();//getting the username 
     if (username === "") {
-
         var userId = Math.floor(Math.random() * 9999).toString()
         username = "user" + userId;
-
         $("#chatbox-username").text(username)//setting username if it does not exist
     }
+    var roomId = $("#roomId").val()
+    socket.emit("joinRoom", { room: roomId })
 
     var userMessage = function (name, text) {
         return ('<li class="media"> <div class="media-body"> <div class="media">' +
