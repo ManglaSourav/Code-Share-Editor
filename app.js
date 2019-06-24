@@ -9,6 +9,7 @@ var session = require("express-session");
 require("./passport");
 var indexRoute = require("./routes/index");
 var authRoute = require("./routes/auth");
+var taskRoute = require("./routes/task");
 
 var mongoose = require("mongoose");
 var config = require("./config");
@@ -20,6 +21,7 @@ mongoose
   .then(() => console.log("mongodb connecton established successfully"))
   .catch(err => console.log(err));
 global.User = require("./models/user");
+global.Task = require("./models/tasks");
 
 var app = express();
 
@@ -64,6 +66,7 @@ app.use(function(req, res, next) {
 });
 
 app.use("/", indexRoute);
+app.use("/", taskRoute);
 app.use("/auth", authRoute);
 
 // catch 404 and forward to error handler
@@ -82,8 +85,9 @@ app.use(function(err, req, res, next) {
   res.render("error");
 });
 
-app.listen(3000, () => {
+var server = app.listen(3000, () => {
   console.log("server is running on 3000");
 });
+require("./socket-server")(server); //runnig socketIO with the same server
 
-module.exports = app;
+// module.exports = app; // exporting it to www file which run server using http but here we running express server

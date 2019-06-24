@@ -1,5 +1,7 @@
-var passport = require("passport");
-var LocalStrategy = require("passport-local").Strategy;
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
+const config = require("./config");
 
 /*
 The basic idea about serialization and deserialization is, when a user is 
@@ -44,6 +46,52 @@ passport.use(
         }
         // all good return user
         return done(null, user);
+      });
+    }
+  )
+);
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: config.fb.FACEBOOK_APP_ID,
+      clientSecret: config.fb.FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3000/auth/facebook/callback",
+      profileFields: ["id", "displayName", "email"]
+    },
+    function(accessToken, refreshToken, profile, done) {
+      User.findOne({ facebookId: profile.id }, function(err, user) {
+        if (err) return done(err);
+
+        if (user) {
+          //If user already exists
+          return done(null, user);
+        } else {
+          //if user exist but this time he/she logged in using facebook
+          User.findOne({ email: "profile.emails[0].value" }, function(
+            err,
+            user
+          ) {
+            if (user) {
+              user.facebookId = profile.id;
+              return user.save(function(err) {
+                if (err)
+                  return done(null, false, { message: "Can't save user info" });
+                return done(null, user);
+              });
+            }
+            // Sign Up new User
+            var user = new User();
+            user.name = profile.displayName;
+            user.email = profile.emails[0].value;
+            user.facebookId = profile.id;
+            user.save(function(err) {
+              if (err)
+                return done(null, false, { message: "Can't save user info" });
+              return done(null, user);
+            });
+          });
+        }
       });
     }
   )
