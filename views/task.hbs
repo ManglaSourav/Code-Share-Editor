@@ -1,10 +1,31 @@
 <div>
     <div class="row">
         <div class="col-md-8">
-            <textarea id="code-screen"></textarea>
+            <textarea id="code-screen">{{content}}</textarea>
         </div>
         <div class="col-md-4" id='chatbox'>
             <div class="panel panel-primary">
+                {{!-- VIDEO CALL --}}
+                <div class="video-container">
+                    <video autoplay id="second-video"></video>
+                    <video autoplay id="my-video" muted="true"></video>
+                    <div id="step2">
+                        <p>Your ID:<span id="my-id">...</span></p>
+                        <div class="form-inline">
+                            <input type="text" class="form-control" placeholder="Call Use ID..." id="callto-id">
+                            <a href="# " class="btn btn-sm btn-success" id="make-call">Call</a>
+                        </div>
+                    </div>
+                    <div id="step3">
+                        <p>Talk to<span id="second-id">...</span>
+                            <a href="# " class="btn btn-sm btn-danger" id="end-call">End Call</a>
+                        </p>
+                    </div>
+
+                </div>
+
+
+                {{!-- CHAT ROOM --}}
                 <div class="panel-heading">
                     CHAT ROOM
                     <span class="pull-right" id="chatbox-username">
@@ -32,19 +53,41 @@
     </div>
 </div>
 <input type="hidden" value="{{roomId}}" id="roomId">
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-{{!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> --}}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/codemirror.min.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/javascript/javascript.min.js'></script>
+<script src="/plugins/ot/ot.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
+    var EditorClient = ot.EditorClient;
+    var SocketIOAdapter = ot.SocketIOAdapter;
+    var CodeMirrorAdapter = ot.CodeMirrorAdapter;
+
+
     var socket = io.connect('http://localhost:3000')
     var editor = CodeMirror.fromTextArea(document.getElementById("code-screen"), {
         lineNumbers: true,
         theme: "monokai"
     });
+
+    var code = $("#code-screen").val() //getting the content of the editor
+    var cmClient;
+    function init(str, revision, clients, serverAdapter) {
+        if (!code) { //if code is empty we will display default str to editor
+            editor.setValue(str)
+        }
+        cmClient = window.cmClient = new EditorClient(
+            revision, clients, serverAdapter, new CodeMirrorAdapter(editor)
+        )
+    }
+
+    socket.on('doc', function (obj) {
+        init(obj.str, obj.revision, obj.clients, new SocketIOAdapter(socket))
+    })
 
     var username = $('#chatbox-username').val();//getting the username 
     if (username === "") {
@@ -52,8 +95,8 @@
         username = "user" + userId;
         $("#chatbox-username").text(username)//setting username if it does not exist
     }
-    var roomId = $("#roomId").val()
-    socket.emit("joinRoom", { room: roomId })
+    var roomId = $("#roomId").val();
+    socket.emit("joinRoom", { room: roomId, username: username }); // getting roomId from task router and here from input tag and use it as a roomID.
 
     var userMessage = function (name, text) {
         return ('<li class="media"> <div class="media-body"> <div class="media">' +
