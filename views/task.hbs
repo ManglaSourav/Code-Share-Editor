@@ -62,7 +62,7 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.25.0/mode/javascript/javascript.min.js'></script>
 <script src="/plugins/ot/ot.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.0.0/peerjs.min.js" <script>
     var EditorClient = ot.EditorClient;
     var SocketIOAdapter = ot.SocketIOAdapter;
     var CodeMirrorAdapter = ot.CodeMirrorAdapter;
@@ -95,6 +95,7 @@
         username = "user" + userId;
         $("#chatbox-username").text(username)//setting username if it does not exist
     }
+
     var roomId = $("#roomId").val();
     socket.emit("joinRoom", { room: roomId, username: username }); // getting roomId from task router and here from input tag and use it as a roomID.
 
@@ -112,5 +113,19 @@
     socket.on('chatMessage', function (data) {
         $("#chatbox-listMessages").append(userMessage(data.username, data.message))
     })
+
+    const peer = new Peer();
+    const conn = peer.connect('another-peers-id');
+    conn.on('open', () => {
+        conn.send('hi!');
+    });
+    peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+            // Will print 'hi!'
+            console.log(data);
+        });
+    });
+    
+
 
 </script>

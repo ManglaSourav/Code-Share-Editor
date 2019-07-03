@@ -17,7 +17,7 @@ module.exports = function(server) {
         var socketIOServer = new ot.EditorSocketIOServer(
           str,
           [],
-          data.room,
+           
           function(socket, cb) {
             var self = this;
             Task.findByIdAndUpdate(
